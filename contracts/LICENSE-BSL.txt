@@ -1,0 +1,76 @@
+Business Source License 1.1
+
+License text copyright © 2025 MariaDB Corporation Ab.
+“Business Source License” is a trademark of MariaDB Corporation Ab.
+
+------------------------------------------------------------
+
+Licensed Work:
+Jackpet Smart Contracts
+
+Licensor:
+Jackpet Team
+
+Copyright:
+Copyright © 2025 Jackpet. All rights reserved.
+
+------------------------------------------------------------
+
+Additional Use Grant
+
+The Licensed Work may be used, copied, modified, and distributed
+for non-commercial purposes only, including but not limited to:
+
+- Smart contract auditing
+- Security research
+- Educational and academic use
+- Hackathon participation and demonstrations
+- Personal experimentation and testing
+
+Commercial use of the Licensed Work is strictly prohibited without
+an explicit written commercial license granted by the Licensor.
+
+Commercial use includes, but is not limited to:
+- Deploying the contracts to a public blockchain for profit
+- Operating a competing or derivative game or service
+- Offering the Licensed Work as part of a paid product or service
+
+------------------------------------------------------------
+
+Change Date
+
+January 1, 2027
+
+------------------------------------------------------------
+
+Change License
+
+On the Change Date, this Licensed Work will automatically be made
+available under the terms of the MIT License.
+
+------------------------------------------------------------
+
+No Trademark License
+
+This license does not grant any rights to use the Jackpet name,
+logo, branding, or trademarks.
+
+------------------------------------------------------------
+
+Disclaimer of Warranty
+
+THE LICENSED WORK IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT.
+
+------------------------------------------------------------
+
+Limitation of Liability
+
+IN NO EVENT SHALL THE LICENSOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR
+OTHER LIABILITY ARISING FROM THE USE OF THE LICENSED WORK.
+
+------------------------------------------------------------
+
+For commercial licensing inquiries, please contact:
+Twitter: @0xSevenK

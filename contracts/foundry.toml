@@ -1,0 +1,26 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
+
+cache = true
+auto_detect_solc = true
+optimizer = true
+via_ir = true
+optimizer_runs = 500
+
+# The gas limit in tests
+gas_limit = 1073741824
+
+remappings = ['@chainlink/contracts=lib/chainlink/contracts/']
+
+[profile.chainlink]
+src = "src"
+out = "out"
+libs = ["lib/chainlink.git/contracts"]
+
+solc_version = "0.8.19"
+optimizer = true
+optimizer_runs = 500

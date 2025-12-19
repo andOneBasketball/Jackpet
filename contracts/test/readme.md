@@ -1,0 +1,1 @@
+forge test --match-path test/ThreeColorPet.t.sol -vv
