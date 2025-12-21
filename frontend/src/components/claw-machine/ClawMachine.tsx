@@ -126,7 +126,7 @@ export default function ClawMachine({
     setGamePhase("grabbing");
     setCollected([]);
 
-    // 等待宠物停止随机移动并回到原位（重要！确保坐标对齐）
+    // Wait for pets to stop random movement and return to original position (important for coordinate alignment)
     await sleep(400);
 
     // Determine pets to grab based on result
@@ -189,15 +189,15 @@ export default function ClawMachine({
       setClawY(clawTargetY);
       await sleep(400);
 
-      // 明显的合爪动作展示 - 在宠物位置停留
+      // Show grabbing action - stay at pet position
       setIsGrabbing(true);
       setGrabbingPetId(targetPet.id);
       setShowGrabEffect(true);
 
-      // 增加停留时间让用户看清合爪动作
+      // Extended hold time for user to see the grabbing action
       await sleep(800);
 
-      // 关闭特效文字但保持抓取状态
+      // Hide effect text but keep grabbing state
       setShowGrabEffect(false);
 
       // Lift up with pet
@@ -289,7 +289,7 @@ export default function ClawMachine({
         </div>
 
         {/* Mechanical claw - positioned to hang from the track */}
-        {/* 容器高度需要覆盖整个 pet pool 区域：从 top-14(56px) 到 bottom-3(368px)，需要 312px */}
+        {/* Container height covers entire pet pool area: from top-14(56px) to bottom-3(368px), needs 312px */}
         <div className="absolute top-14 left-0 right-0 h-[320px] z-10">
           <Claw x={actualClawX} y={clawY} isGrabbing={isGrabbing} isAnimating={isAnimating} isIdle={isIdle} showGrabEffect={showGrabEffect} />
         </div>
@@ -367,7 +367,7 @@ export default function ClawMachine({
             >
               {isWinner ? (
                 <>
-                  {/* 胜利动画效果 */}
+                  {/* Win animation effect */}
                   <motion.div
                     className="text-6xl mb-2"
                     animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
@@ -394,7 +394,7 @@ export default function ClawMachine({
                 </>
               ) : (
                 <>
-                  {/* 失败动画效果 */}
+                  {/* Lose animation effect */}
                   <motion.div
                     className="text-6xl mb-2"
                     animate={{ y: [0, 5, 0] }}

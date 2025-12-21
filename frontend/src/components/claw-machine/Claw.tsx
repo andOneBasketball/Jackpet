@@ -8,7 +8,7 @@ interface ClawProps {
   isGrabbing: boolean;
   isAnimating: boolean;
   isIdle: boolean;
-  showGrabEffect?: boolean; // 显示明显的合爪效果
+  showGrabEffect?: boolean; // Show enhanced grabbing effect
 }
 
 export default function Claw({ x, y, isGrabbing, isAnimating, isIdle, showGrabEffect = false }: ClawProps) {
@@ -16,7 +16,7 @@ export default function Claw({ x, y, isGrabbing, isAnimating, isIdle, showGrabEf
   // When grabbing, arms close fully with enhanced angle
   const getArmRotation = (baseAngle: number, isLeft: boolean) => {
     if (isGrabbing) {
-      // 增强合爪角度，从35度增加到50度，更明显的闭合
+      // Enhanced grabbing angle, from 35 to 50 degrees for more visible closing
       return isLeft ? 50 : -50;
     }
     if (isIdle && !isAnimating) {
@@ -26,10 +26,10 @@ export default function Claw({ x, y, isGrabbing, isAnimating, isIdle, showGrabEf
     return isLeft ? 10 : -10;
   };
 
-  // 下部爪尖的额外闭合角度
+  // Extra closing angle for lower claw tips
   const getLowerArmRotation = (isLeft: boolean) => {
     if (isGrabbing) {
-      // 增强爪尖闭合，更明显的抓取效果
+      // Enhanced claw tip closing for more visible grabbing effect
       return isLeft ? -25 : 25;
     }
     if (isIdle && !isAnimating) {
@@ -195,7 +195,7 @@ export default function Claw({ x, y, isGrabbing, isAnimating, isIdle, showGrabEf
       {/* Grab glow effect - enhanced */}
       {isGrabbing && (
         <>
-          {/* 主发光效果 */}
+          {/* Main glow effect */}
           <motion.div
             className="absolute -bottom-2 left-1/2 transform -translate-x-1/2"
             initial={{ scale: 0, opacity: 0.8 }}
@@ -204,7 +204,7 @@ export default function Claw({ x, y, isGrabbing, isAnimating, isIdle, showGrabEf
           >
             <div className="w-10 h-10 bg-yellow-400 rounded-full blur-md" />
           </motion.div>
-          {/* 额外的能量环效果 */}
+          {/* Extra energy ring effect */}
           <motion.div
             className="absolute -bottom-3 left-1/2 transform -translate-x-1/2"
             initial={{ scale: 0.5, opacity: 0 }}
@@ -213,7 +213,7 @@ export default function Claw({ x, y, isGrabbing, isAnimating, isIdle, showGrabEf
           >
             <div className="w-12 h-12 border-2 border-yellow-300 rounded-full" />
           </motion.div>
-          {/* 合爪提示文字 */}
+          {/* Grabbing hint text */}
           {showGrabEffect && (
             <motion.div
               className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap"

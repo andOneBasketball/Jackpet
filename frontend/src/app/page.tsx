@@ -8,6 +8,89 @@ import { ClawMachine } from "@/components/claw-machine";
 import PayoutTable from "@/components/PayoutTable";
 import { useJackpet } from "@/hooks/useJackpet";
 
+// Custom ConnectButton to force display chain info
+function CustomConnectButton() {
+  return (
+    <ConnectButton.Custom>
+      {({
+        account,
+        chain,
+        openAccountModal,
+        openChainModal,
+        openConnectModal,
+        mounted,
+      }) => {
+        const ready = mounted;
+        const connected = ready && account && chain;
+
+        return (
+          <div
+            {...(!ready && {
+              "aria-hidden": true,
+              style: {
+                opacity: 0,
+                pointerEvents: "none",
+                userSelect: "none",
+              },
+            })}
+          >
+            {(() => {
+              if (!connected) {
+                return (
+                  <button
+                    onClick={openConnectModal}
+                    className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl transition-colors"
+                  >
+                    Connect Wallet
+                  </button>
+                );
+              }
+
+              return (
+                <div className="flex items-center gap-2">
+                  {/* Chain info button */}
+                  <button
+                    onClick={openChainModal}
+                    className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+                  >
+                    {chain.hasIcon && (
+                      <div
+                        className="w-5 h-5 rounded-full overflow-hidden"
+                        style={{ background: chain.iconBackground }}
+                      >
+                        {chain.iconUrl && (
+                          <img
+                            alt={chain.name ?? "Chain icon"}
+                            src={chain.iconUrl}
+                            className="w-5 h-5"
+                          />
+                        )}
+                      </div>
+                    )}
+                    <span className="text-white text-sm font-medium">
+                      {chain.name}
+                    </span>
+                  </button>
+
+                  {/* Account info button */}
+                  <button
+                    onClick={openAccountModal}
+                    className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors"
+                  >
+                    <span className="text-white text-sm">
+                      {account.displayBalance && `${account.displayBalance} | `}
+                      {account.displayName}
+                    </span>
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+        );
+      }}
+    </ConnectButton.Custom>
+  );
+}
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const { isConnected } = useAccount();
@@ -56,7 +139,7 @@ export default function Home() {
             </div>
           </div>
 
-          {mounted && <ConnectButton />}
+          {mounted && <CustomConnectButton />}
         </motion.header>
 
         {/* Main Content */}
@@ -93,7 +176,7 @@ export default function Home() {
                 <p className="text-gray-400 mb-4 text-sm">
                   Experience the thrill of the claw machine lottery!
                 </p>
-                {mounted && <ConnectButton />}
+                {mounted && <CustomConnectButton />}
 
                 {/* Demo Mode */}
                 <div className="mt-6">
