@@ -2,7 +2,7 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 
 export const metadata = {
-  title: "Three Color Pets - Claw Machine Lottery",
+  title: "Jackpet - Claw Machine Lottery",
   description: "Grab your fortune with Chainlink VRF powered pet lottery!",
 };
 
