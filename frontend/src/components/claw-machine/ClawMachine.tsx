@@ -52,6 +52,7 @@ export default function ClawMachine({
   const [mouseClawX, setMouseClawX] = useState(0);
   const [isGrabbing, setIsGrabbing] = useState(false);
   const [grabbingPetId, setGrabbingPetId] = useState<number | null>(null);
+  const [showGrabEffect, setShowGrabEffect] = useState(false);
   const [gamePhase, setGamePhase] = useState<"idle" | "grabbing" | "result">("idle");
   const [showResult, setShowResult] = useState(false);
   const processedResultRef = useRef<{ a: number; b: number; c: number } | null>(null);
@@ -125,6 +126,9 @@ export default function ClawMachine({
     setGamePhase("grabbing");
     setCollected([]);
 
+    // 等待宠物停止随机移动并回到原位（重要！确保坐标对齐）
+    await sleep(400);
+
     // Determine pets to grab based on result
     // a, b, c are sorted counts, we randomly assign colors
     const types: PetType[] = ["FOX", "WOLF", "FROG"];
@@ -144,18 +148,20 @@ export default function ClawMachine({
 
     // Coordinate calculation:
     // Machine width: 480px, center: 240px
-    // Pet pool left padding: 12px (left-3)
-    // Pet size: 40px (w-10 h-10)
+    // Pet pool: left-3(12px) + border-2(2px) = 14px offset
+    // Pet size: 40px (w-10 h-10), half = 20px
     //
-    // Layout:
-    // - Claw container top: 56px
-    // - Pet pool top: 120px
-    // - When claw y=0, claw tip is at approximately 56 + 100 = 156px from machine top
-    // - Pet top position = 120 + pet.y
-    // - To align claw tip with pet top: 156 + y = 120 + pet.y
-    // - y = pet.y - 36
+    // Y Layout analysis:
+    // - Claw container starts at top-14 (56px)
+    // - IMPORTANT: Claw movement is 2x the y value!
+    //   Parent moves y pixels + cable extends y pixels = 2y total movement
+    // - When y=0, claw tip is at ~157px (56 + 16 cable + 85 claw body)
+    // - Pet pool starts at 122px (120px + 2px border)
+    // - Pet center Y = 122 + pet.y + 20
+    // - To reach pet: 157 + 2*y = 122 + pet.y + 20
+    // - Solving: y = (pet.y - 15) / 2
     const machineCenter = 240;
-    const petPoolLeftPadding = 12;
+    const petPoolLeftOffset = 14; // left-3 (12px) + border-2 (2px)
     const petHalfSize = 20;
 
     for (let i = 0; i < 12; i++) {
@@ -166,10 +172,14 @@ export default function ClawMachine({
       const targetPet = currentPets[targetPetIndex];
       currentPets.splice(targetPetIndex, 1);
 
-      // Calculate claw position to match pet
-      const clawTargetX = targetPet.x + petPoolLeftPadding + petHalfSize - machineCenter;
-      // Y position - claw tip should reach pet top, use negative offset to stop above pet
-      const clawTargetY = Math.max(0, targetPet.y - 40);
+      // Calculate claw position to match pet center
+      // Pet center X (relative to machine) = petPoolLeftOffset + pet.x + petHalfSize
+      // Claw X is relative to machine center, so subtract machineCenter
+      const clawTargetX = targetPet.x + petPoolLeftOffset + petHalfSize - machineCenter;
+
+      // Y position: y = (pet.y - 15) / 2 (divided by 2 because claw moves 2x the y value)
+      // Use Math.max to ensure y doesn't go negative
+      const clawTargetY = Math.max(0, (targetPet.y - 15) / 2);
 
       // Move claw horizontally first
       setClawX(clawTargetX);
@@ -179,10 +189,16 @@ export default function ClawMachine({
       setClawY(clawTargetY);
       await sleep(400);
 
-      // Grab - claw closes on the pet (hold longer so user can see)
+      // 明显的合爪动作展示 - 在宠物位置停留
       setIsGrabbing(true);
       setGrabbingPetId(targetPet.id);
-      await sleep(500);
+      setShowGrabEffect(true);
+
+      // 增加停留时间让用户看清合爪动作
+      await sleep(800);
+
+      // 关闭特效文字但保持抓取状态
+      setShowGrabEffect(false);
 
       // Lift up with pet
       setClawY(0);
@@ -273,8 +289,9 @@ export default function ClawMachine({
         </div>
 
         {/* Mechanical claw - positioned to hang from the track */}
-        <div className="absolute top-14 left-0 right-0 h-[240px] z-10">
-          <Claw x={actualClawX} y={clawY} isGrabbing={isGrabbing} isAnimating={isAnimating} isIdle={isIdle} />
+        {/* 容器高度需要覆盖整个 pet pool 区域：从 top-14(56px) 到 bottom-3(368px)，需要 312px */}
+        <div className="absolute top-14 left-0 right-0 h-[320px] z-10">
+          <Claw x={actualClawX} y={clawY} isGrabbing={isGrabbing} isAnimating={isAnimating} isIdle={isIdle} showGrabEffect={showGrabEffect} />
         </div>
 
         {/* Upper empty area - visible space between claw and pet pool */}
@@ -345,39 +362,98 @@ export default function ClawMachine({
                 isWinner
                   ? "bg-gradient-to-br from-yellow-400 to-orange-500"
                   : "bg-gradient-to-br from-gray-700 to-gray-800"
-              } text-center shadow-2xl`}
+              } text-center shadow-2xl max-w-sm`}
               onClick={(e) => e.stopPropagation()}
             >
-              <motion.div
-                className="text-6xl mb-4"
-                animate={{ rotate: isWinner ? [0, -10, 10, 0] : 0 }}
-                transition={{ repeat: isWinner ? Infinity : 0, duration: 0.5 }}
-              >
-                {isWinner ? "🎉" : "😢"}
-              </motion.div>
-              <h3 className={`text-3xl font-bold mb-2 ${isWinner ? "text-white" : "text-gray-300"}`}>
-                {isWinner ? "YOU WON!" : "Try Again!"}
-              </h3>
+              {isWinner ? (
+                <>
+                  {/* 胜利动画效果 */}
+                  <motion.div
+                    className="text-6xl mb-2"
+                    animate={{ rotate: [0, -10, 10, 0], scale: [1, 1.1, 1] }}
+                    transition={{ repeat: Infinity, duration: 0.8 }}
+                  >
+                    🎉
+                  </motion.div>
+                  <motion.h3
+                    className="text-3xl font-bold text-white mb-1"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    Congratulations!
+                  </motion.h3>
+                  <motion.p
+                    className="text-xl text-white/90 mb-3"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    You&apos;re a Winner! 🏆
+                  </motion.p>
+                </>
+              ) : (
+                <>
+                  {/* 失败动画效果 */}
+                  <motion.div
+                    className="text-6xl mb-2"
+                    animate={{ y: [0, 5, 0] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    😢
+                  </motion.div>
+                  <motion.h3
+                    className="text-2xl font-bold text-gray-300 mb-1"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    So Close!
+                  </motion.h3>
+                  <motion.p
+                    className="text-lg text-gray-400 mb-3"
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Better Luck Next Time
+                  </motion.p>
+                </>
+              )}
               <div className="text-lg text-white/80 mb-4">
                 Result: {result.a} - {result.b} - {result.c}
               </div>
               {payoutInfo && (
-                <div className="text-xl font-bold text-white">
+                <motion.div
+                  className="text-xl font-bold text-white"
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.4, type: "spring" }}
+                >
                   <span className="text-2xl">{payoutInfo.multiplier}</span>
                   {payoutInfo.jackpotShare !== "0%" && (
                     <span className="ml-2 text-yellow-300">+{payoutInfo.jackpotShare} JP</span>
                   )}
-                </div>
+                </motion.div>
               )}
-              <button
+              <motion.button
                 onClick={() => {
                   setShowResult(false);
                   resetGame();
                 }}
-                className="mt-4 px-6 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white font-bold"
+                className={`mt-4 px-6 py-2 rounded-lg font-bold ${
+                  isWinner
+                    ? "bg-white/20 hover:bg-white/30 text-white"
+                    : "bg-purple-600 hover:bg-purple-500 text-white"
+                }`}
+                initial={{ y: 20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
-                Continue
-              </button>
+                {isWinner ? "Claim & Continue" : "Try Again"}
+              </motion.button>
             </motion.div>
           </motion.div>
         )}

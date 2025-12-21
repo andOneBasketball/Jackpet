@@ -8,20 +8,34 @@ interface ClawProps {
   isGrabbing: boolean;
   isAnimating: boolean;
   isIdle: boolean;
+  showGrabEffect?: boolean; // 显示明显的合爪效果
 }
 
-export default function Claw({ x, y, isGrabbing, isAnimating, isIdle }: ClawProps) {
+export default function Claw({ x, y, isGrabbing, isAnimating, isIdle, showGrabEffect = false }: ClawProps) {
   // In idle mode, arms animate open/close to hint user to click
-  // When grabbing, arms close fully
+  // When grabbing, arms close fully with enhanced angle
   const getArmRotation = (baseAngle: number, isLeft: boolean) => {
     if (isGrabbing) {
-      return isLeft ? 35 : -35;
+      // 增强合爪角度，从35度增加到50度，更明显的闭合
+      return isLeft ? 50 : -50;
     }
     if (isIdle && !isAnimating) {
       // Idle grab-release animation cycle
       return isLeft ? [8, 30, 8] : [-8, -30, -8];
     }
     return isLeft ? 10 : -10;
+  };
+
+  // 下部爪尖的额外闭合角度
+  const getLowerArmRotation = (isLeft: boolean) => {
+    if (isGrabbing) {
+      // 增强爪尖闭合，更明显的抓取效果
+      return isLeft ? -25 : 25;
+    }
+    if (isIdle && !isAnimating) {
+      return isLeft ? [-3, -15, -3] : [3, 15, 3];
+    }
+    return 0;
   };
 
   return (
@@ -108,16 +122,20 @@ export default function Claw({ x, y, isGrabbing, isAnimating, isIdle }: ClawProp
               {/* Lower arm with claw tip */}
               <motion.div
                 className="origin-top -mt-0.5"
-                animate={{ rotate: isGrabbing ? -12 : isIdle && !isAnimating ? [-3, -15, -3] : 0 }}
+                animate={{ rotate: getLowerArmRotation(true) }}
                 transition={
                   isIdle && !isAnimating
                     ? { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
-                    : { type: "spring", stiffness: 200, damping: 15 }
+                    : { type: "spring", stiffness: 150, damping: 12 }
                 }
               >
                 <div className="w-1.5 h-5 bg-gradient-to-b from-gray-400 to-gray-500 rounded-b-lg mx-auto border border-gray-600" />
                 {/* Claw tip */}
-                <div className="w-2.5 h-3 bg-gradient-to-b from-orange-400 to-orange-600 rounded-b-full mx-auto -mt-0.5 shadow-sm border border-orange-700" />
+                <motion.div
+                  className="w-2.5 h-3 bg-gradient-to-b from-orange-400 to-orange-600 rounded-b-full mx-auto -mt-0.5 shadow-sm border border-orange-700"
+                  animate={isGrabbing ? { scale: [1, 1.1, 1] } : {}}
+                  transition={{ duration: 0.3, repeat: isGrabbing ? Infinity : 0 }}
+                />
               </motion.div>
             </div>
           </motion.div>
@@ -155,31 +173,58 @@ export default function Claw({ x, y, isGrabbing, isAnimating, isIdle }: ClawProp
               <div className="w-2.5 h-2.5 bg-gradient-to-b from-gray-400 to-gray-600 rounded-full mx-auto -mt-0.5 border border-gray-700" />
               <motion.div
                 className="origin-top -mt-0.5"
-                animate={{ rotate: isGrabbing ? 12 : isIdle && !isAnimating ? [3, 15, 3] : 0 }}
+                animate={{ rotate: getLowerArmRotation(false) }}
                 transition={
                   isIdle && !isAnimating
                     ? { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
-                    : { type: "spring", stiffness: 200, damping: 15 }
+                    : { type: "spring", stiffness: 150, damping: 12 }
                 }
               >
                 <div className="w-1.5 h-5 bg-gradient-to-b from-gray-400 to-gray-500 rounded-b-lg mx-auto border border-gray-600" />
-                <div className="w-2.5 h-3 bg-gradient-to-b from-orange-400 to-orange-600 rounded-b-full mx-auto -mt-0.5 shadow-sm border border-orange-700" />
+                <motion.div
+                  className="w-2.5 h-3 bg-gradient-to-b from-orange-400 to-orange-600 rounded-b-full mx-auto -mt-0.5 shadow-sm border border-orange-700"
+                  animate={isGrabbing ? { scale: [1, 1.1, 1] } : {}}
+                  transition={{ duration: 0.3, repeat: isGrabbing ? Infinity : 0 }}
+                />
               </motion.div>
             </div>
           </motion.div>
         </div>
       </motion.div>
 
-      {/* Grab glow effect */}
+      {/* Grab glow effect - enhanced */}
       {isGrabbing && (
-        <motion.div
-          className="absolute -bottom-2 left-1/2 transform -translate-x-1/2"
-          initial={{ scale: 0, opacity: 0.8 }}
-          animate={{ scale: [1, 1.3, 1], opacity: [0.6, 0, 0.6] }}
-          transition={{ duration: 0.5, repeat: Infinity }}
-        >
-          <div className="w-8 h-8 bg-yellow-400 rounded-full blur-md" />
-        </motion.div>
+        <>
+          {/* 主发光效果 */}
+          <motion.div
+            className="absolute -bottom-2 left-1/2 transform -translate-x-1/2"
+            initial={{ scale: 0, opacity: 0.8 }}
+            animate={{ scale: [1, 1.5, 1], opacity: [0.8, 0.3, 0.8] }}
+            transition={{ duration: 0.4, repeat: Infinity }}
+          >
+            <div className="w-10 h-10 bg-yellow-400 rounded-full blur-md" />
+          </motion.div>
+          {/* 额外的能量环效果 */}
+          <motion.div
+            className="absolute -bottom-3 left-1/2 transform -translate-x-1/2"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: [0.5, 2, 0.5], opacity: [0, 0.6, 0] }}
+            transition={{ duration: 0.6, repeat: Infinity }}
+          >
+            <div className="w-12 h-12 border-2 border-yellow-300 rounded-full" />
+          </motion.div>
+          {/* 合爪提示文字 */}
+          {showGrabEffect && (
+            <motion.div
+              className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap"
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <span className="text-yellow-300 text-xs font-bold drop-shadow-lg">GRABBING!</span>
+            </motion.div>
+          )}
+        </>
       )}
     </motion.div>
   );
